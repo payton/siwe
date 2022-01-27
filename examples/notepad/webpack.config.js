@@ -31,7 +31,7 @@ module.exports = {
     mode: 'development',
     output: {
         filename: 'bundle.js',
-        path: path.resolve('../../../notepad/app/static/app'),
+        path: path.resolve('../../../../notepad/app/static/app'),
     },
     plugins: [
         new webpack.ProvidePlugin({
