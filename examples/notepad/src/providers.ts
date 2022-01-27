@@ -76,7 +76,9 @@ const signIn = async (connector: Providers) => {
      * Gets a nonce from our backend, this will add this nonce to the session so
      * we can check it on sign in.
      */
-    const nonce = await fetch('/api/nonce', { credentials: 'include' }).then((res) => res.text());
+    const nonce = await fetch('/api/authentication/nonce', { credentials: 'include' }).then((res) =>
+        res.json().then((body) => body['nonce']),
+    );
 
     /**
      * Creates the message object
@@ -102,15 +104,19 @@ const signIn = async (connector: Providers) => {
      * Calls our sign_in endpoint to validate the message, if successful it will
      * save the message in the session and allow the user to store his text
      */
-    fetch(`/api/sign_in`, {
+    fetch(`/api/authentication/login`, {
         method: 'POST',
         body: JSON.stringify({ message, ens }),
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
     }).then(async (res) => {
         if (res.status === 200) {
-            res.json().then(({ text, address, ens }) => {
-                connectedState(text, address, ens);
+            fetch('/api/me', { credentials: 'include' }).then((res) => {
+                if (res.status === 200) {
+                    res.json().then(({ text, address, ens }) => {
+                        connectedState(text, address, ens);
+                    });
+                }
                 return;
             });
         } else {
@@ -124,7 +130,7 @@ const signIn = async (connector: Providers) => {
 const signOut = async () => {
     updateTitle('Untitled');
     updateNotepad('');
-    return fetch('/api/sign_out', {
+    return fetch('/api/authentication/logout', {
         method: 'POST',
         credentials: 'include',
     }).then(() => disconnectedState());
